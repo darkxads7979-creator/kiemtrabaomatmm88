@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SECURITY SCANNER V5.0 | MM88C SYSTEM</title>
+    <title>HỆ THỐNG QUÉT BẢO MẬT | MM88C GLOBAL</title>
     <style>
         :root {
             --neon-green: #00ff41;
@@ -11,29 +11,28 @@
             --gold: #ffcc00;
             --dark-bg: #050505;
         }
-        body { font-family: 'Courier New', Courier, monospace; background: var(--dark-bg); color: #fff; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow: hidden; }
+        body { font-family: 'Courier New', Courier, monospace; background: var(--dark-bg); color: #fff; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow-x: hidden; }
         
-        .main-frame { width: 480px; background: #111; border: 2px solid #333; padding: 25px; border-radius: 5px; box-shadow: 0 0 30px rgba(0,0,0,0.9); position: relative; }
+        .main-frame { width: 90%; max-width: 480px; background: #111; border: 2px solid #333; padding: 25px; border-radius: 5px; box-shadow: 0 0 30px rgba(0,0,0,0.9); position: relative; }
         .header { text-align: center; border-bottom: 1px solid #333; margin-bottom: 20px; padding-bottom: 10px; }
-        .header h1 { font-size: 18px; margin: 0; color: var(--gold); letter-spacing: 3px; }
+        .header h1 { font-size: 18px; margin: 0; color: var(--gold); letter-spacing: 2px; text-transform: uppercase; }
         .header p { font-size: 10px; color: #666; margin: 5px 0; }
 
-        .input-area { display: flex; gap: 5px; margin-bottom: 15px; }
-        input { flex: 1; background: #000; border: 1px solid #444; padding: 12px; color: var(--neon-green); font-weight: bold; outline: none; border-radius: 3px; }
-        button { background: var(--gold); color: #000; border: none; padding: 0 20px; font-weight: 900; cursor: pointer; border-radius: 3px; transition: 0.2s; }
-        button:hover { background: #fff; transform: scale(1.05); }
+        .input-group { display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px; }
+        .input-item { display: flex; flex-direction: column; gap: 5px; }
+        label { font-size: 10px; color: var(--gold); text-transform: uppercase; margin-left: 2px; }
+        input { background: #000; border: 1px solid #444; padding: 12px; color: var(--neon-green); font-weight: bold; outline: none; border-radius: 3px; font-size: 14px; }
+        input:focus { border-color: var(--gold); }
+        
+        button { background: var(--gold); color: #000; border: none; padding: 15px; font-weight: 900; cursor: pointer; border-radius: 3px; transition: 0.2s; text-transform: uppercase; margin-top: 5px; }
+        button:hover { background: #fff; transform: scale(1.02); }
 
-        /* Console Area */
-        #console-output { background: #000; height: 150px; border: 1px solid #222; padding: 10px; font-size: 11px; color: #888; overflow-y: hidden; margin-bottom: 15px; line-height: 1.4; }
-        .log-green { color: var(--neon-green); }
-        .log-red { color: var(--neon-red); }
-
-        /* Results */
-        #result-display { display: none; padding: 15px; border: 2px solid; text-align: center; border-radius: 4px; }
+        #console-output { background: #000; height: 140px; border: 1px solid #222; padding: 10px; font-size: 11px; color: #888; overflow-y: hidden; margin-top: 15px; line-height: 1.4; border-radius: 3px; }
+        
+        #result-display { display: none; padding: 15px; border: 2px solid; text-align: center; border-radius: 4px; margin-top: 15px; }
         .safe-result { border-color: var(--neon-green); background: rgba(0, 255, 65, 0.05); }
         .danger-result { border-color: var(--neon-red); background: rgba(255, 49, 49, 0.05); }
 
-        /* Animation */
         @keyframes shake {
             0% { transform: translate(1px, 1px) rotate(0deg); }
             10% { transform: translate(-1px, -2px) rotate(-1deg); }
@@ -43,8 +42,7 @@
             100% { transform: translate(1px, -2px) rotate(0deg); }
         }
         .shake-effect { animation: shake 0.5s; animation-iteration-count: 2; }
-
-        .scan-line { height: 2px; background: var(--neon-green); width: 100%; position: absolute; top: 0; left: 0; opacity: 0; transition: 0.1s; box-shadow: 0 0 10px var(--neon-green); }
+        .scan-line { height: 2px; background: var(--neon-green); width: 100%; position: absolute; top: 0; left: 0; opacity: 0; transition: 0.1s; box-shadow: 0 0 10px var(--neon-green); z-index: 10; }
     </style>
 </head>
 <body>
@@ -52,45 +50,50 @@
 <div class="main-frame" id="scanner-box">
     <div class="scan-line" id="laser"></div>
     <div class="header">
-        <h1>ADVANCED WEB SCANNER</h1>
-        <p>MM88C SECURITY DEPLOYMENT • VERSION 5.0.1</p>
+        <h1>HỆ THỐNG QUÉT BẢO MẬT</h1>
+        <p>MM88C SECURITY DEPLOYMENT • VERSION 5.0.3</p>
     </div>
 
-    <div class="input-area">
-        <input type="text" id="target" placeholder="Dán Link hoặc Username cần quét...">
-        <button onclick="executeScan()">QUÉT</button>
+    <div class="input-group">
+        <div class="input-item">
+            <label>Tên miền / Trang web:</label>
+            <input type="text" id="domain" placeholder="Ví dụ: mm88c.com hoặc trang-doi-thu.com">
+        </div>
+        <div class="input-item">
+            <label>Tên người dùng (Username):</label>
+            <input type="text" id="username" placeholder="Nhập tên nhân vật hoặc ID...">
+        </div>
+        <button onclick="executeScan()">KÍCH HOẠT QUÉT SÂU</button>
     </div>
 
-    <div id="console-output">
-        > System Idle. Waiting for input...
-    </div>
-
+    <div id="console-output">> Chờ nhập liệu dữ liệu mục tiêu...</div>
     <div id="result-display"></div>
 </div>
 
 <script>
     const steps = [
-        "Initializing core analysis...",
-        "Bypassing proxy layers...",
-        "Fetching remote script data...",
-        "Analyzing MD5 hash collisions...",
-        "Detecting hidden redirect chains...",
-        "Scanning database injection logs...",
-        "Verifying SSL/TLS authenticity...",
-        "Generating final safety report..."
+        "Đang xác thực địa chỉ IP server...",
+        "Truy quét Scripts ẩn trên Domain...",
+        "Phân tích dữ liệu tài khoản khách hàng...",
+        "Kiểm tra thuật toán điều hướng (RNG)...",
+        "Dò tìm mã độc can thiệp kết quả...",
+        "Xác minh chứng chỉ bảo mật quốc tế...",
+        "Đối soát MD5 Database...",
+        "Kết thúc phiên quét mã bảo mật..."
     ];
 
     function executeScan() {
-        const target = document.getElementById('target').value.trim().toLowerCase();
-        if(!target) return;
+        const domain = document.getElementById('domain').value.trim().toLowerCase();
+        const user = document.getElementById('username').value.trim();
+        
+        if(!domain || !user) return alert("Vui lòng nhập đầy đủ Tên miền và Username!");
 
-        // Reset UI
         const consoleOut = document.getElementById('console-output');
         const laser = document.getElementById('laser');
         const box = document.getElementById('scanner-box');
         const result = document.getElementById('result-display');
         
-        consoleOut.innerHTML = "> Start Scanning: " + target;
+        consoleOut.innerHTML = "> Đang phân tích mục tiêu: " + domain;
         result.style.display = 'none';
         box.classList.remove('shake-effect');
         laser.style.opacity = '1';
@@ -102,53 +105,56 @@
                 p.innerText = "> " + steps[i];
                 consoleOut.appendChild(p);
                 consoleOut.scrollTop = consoleOut.scrollHeight;
-                
-                // Di chuyển tia laser giả lập
                 laser.style.top = (i * 12) + "%";
                 i++;
             } else {
                 clearInterval(interval);
                 laser.style.opacity = '0';
-                renderResult(target);
+                renderResult(domain, user);
             }
         }, 400);
     }
 
-    function renderResult(target) {
+    function renderResult(domain, user) {
         const result = document.getElementById('result-display');
         const box = document.getElementById('scanner-box');
         result.style.display = 'block';
 
-        // TRƯỜNG HỢP: TRANG NHÀ mm88c.com
-        if(target.includes("mm88c.com")) {
+        // LOGIC: NẾU LÀ MM88C.COM
+        if(domain.includes("mm88c.com")) {
             result.className = "safe-result";
             result.innerHTML = `
-                <h2 style="color:var(--neon-green); margin:0;">100% AN TOÀN</h2>
-                <p style="font-size:12px; color:#ccc;">Hệ thống <b>MM88C.COM</b> Đã được xác minh danh tính quốc tế. <br> Không phát hiện mã ẩn, không can thiệp kết quả.</p>
-                <div style="font-size:10px; color:var(--neon-green)">MD5 Checksum: Valid ✅</div>
+                <h2 style="color:var(--neon-green); margin:0; font-size: 18px;">XÁC MINH: AN TOÀN</h2>
+                <p style="font-size:12px; color:#ccc; line-height: 1.5;">
+                    Tài khoản <b>${user}</b> trên <b>MM88C.COM</b> hoàn toàn minh bạch. <br>
+                    Hệ thống sạch 100%, không phát hiện mã ẩn can thiệp.
+                </p>
+                <div style="font-size:10px; color:var(--neon-green)">MD5 HASH: VERIFIED ✅</div>
             `;
         } 
-        // TRƯỜNG HỢP: ĐỐI THỦ (80% Báo Xấu)
+        // LOGIC: ĐỐI THỦ (80% BÁO XẤU)
         else {
             const isDanger = Math.random() < 0.8;
             if(isDanger) {
-                box.classList.add('shake-effect'); // Rung màn hình
+                box.classList.add('shake-effect');
                 result.className = "danger-result";
                 result.innerHTML = `
-                    <h2 style="color:var(--neon-red); margin:0;">CẢNH BÁO RỦI RO</h2>
-                    <p style="font-size:12px; color:#ccc;">Phát hiện <b>Symmetric Scripts</b> ẩn điều hướng tỷ lệ thắng.<br>Dữ liệu người dùng có nguy cơ bị rò rỉ.</p>
-                    <div style="font-size:10px; color:var(--neon-red)">Status: INSECURE ❌</div>
+                    <h2 style="color:var(--neon-red); margin:0; font-size: 18px;">CẢNH BÁO RỦI RO</h2>
+                    <p style="font-size:12px; color:#ccc; line-height: 1.5;">
+                        Phát hiện <b>Mã Ẩn</b> tác động lên tài khoản <b>${user}</b>. <br>
+                        Trang web này có dấu hiệu can thiệp tỷ lệ thắng/thua.
+                    </p>
+                    <div style="font-size:10px; color:var(--neon-red)">STATUS: UNSECURE ❌</div>
                 `;
             } else {
                 result.className = "safe-result";
                 result.innerHTML = `
-                    <h2 style="color:var(--neon-green); margin:0;">TẠM THỜI AN TOÀN</h2>
-                    <p style="font-size:12px; color:#ccc;">Chưa phát hiện mã ẩn tại thời điểm này. Cần theo dõi thêm.</p>
+                    <h2 style="color:var(--neon-green); margin:0; font-size: 18px;">KẾT QUẢ: TẠM ỔN</h2>
+                    <p style="font-size:12px; color:#ccc;">Chưa phát hiện mã ẩn can thiệp tài khoản này.</p>
                 `;
             }
         }
     }
 </script>
-
 </body>
 </html>
