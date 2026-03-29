@@ -3,19 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>HỆ THỐNG KIỂM ĐỊNH BẢO MẬT TOÀN CẦU | MM88 GLOBAL</title>
+    <title>HỆ THỐNG KIỂM ĐỊNH BẢO MẬT | MM88 GLOBAL</title>
     <style>
         :root {
             --neon-green: #00ff41;
-            --dark-green: #003300;
             --neon-red: #ff3131;
-            --dark-red: #330000;
             --gold: #ffcc00;
             --dark-bg: #000000;
-            --panel-bg: rgba(10, 10, 10, 0.9);
         }
 
-        * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
+        * { box-sizing: border-box; user-select: none; }
         
         body { 
             font-family: 'Courier New', Courier, monospace; 
@@ -26,57 +23,199 @@
             justify-content: center; 
             align-items: center; 
             min-height: 100vh; 
-            overflow: hidden; 
-            position: relative;
+            overflow: hidden;
         }
 
-        /* Hiệu ứng nền Matrix */
         #matrix-bg {
-            position: absolute;
+            position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            opacity: 0.1;
+            opacity: 0.15;
             z-index: 1;
         }
 
         .main-frame { 
             width: 95%; 
-            max-width: 500px; 
-            background: var(--panel-bg); 
+            max-width: 480px; 
+            background: rgba(10, 10, 10, 0.95); 
             border: 2px solid var(--neon-green); 
-            padding: 30px; 
+            padding: 25px; 
             border-radius: 5px; 
-            box-shadow: 0 0 50px rgba(0, 255, 65, 0.4); 
+            box-shadow: 0 0 30px rgba(0, 255, 65, 0.3); 
             position: relative; 
             z-index: 10;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(5px);
+            backdrop-filter: blur(10px);
         }
         
-        /* Tiêu đề góc màn hình dạng Military */
-        .corner-tag {
-            position: absolute;
-            top: -10px;
-            left: 20px;
-            background: var(--dark-bg);
-            padding: 0 10px;
-            color: var(--neon-green);
-            font-size: 10px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            border: 1px solid var(--neon-green);
+        .header { text-align: center; border-bottom: 1px solid #333; margin-bottom: 20px; padding-bottom: 15px; }
+        .header h1 { font-size: 20px; margin: 0; color: var(--gold); letter-spacing: 2px; text-transform: uppercase; }
+        .header p { font-size: 10px; color: #888; margin-top: 5px; }
+
+        .input-group { display: flex; flex-direction: column; gap: 15px; }
+        label { font-size: 11px; color: var(--gold); text-transform: uppercase; font-weight: bold; }
+        
+        input { 
+            background: #000; 
+            border: 1px solid #444; 
+            padding: 12px; 
+            color: var(--neon-green); 
+            outline: none; 
+            border-radius: 3px; 
+            font-size: 15px; 
+            width: 100%;
+        }
+        input:focus { border-color: var(--gold); }
+        
+        button { 
+            background: var(--gold); 
+            color: #000; 
+            border: none; 
+            padding: 15px; 
+            font-weight: 900; 
+            cursor: pointer; 
+            border-radius: 3px; 
+            text-transform: uppercase; 
+            font-size: 16px; 
+            margin-top: 10px;
         }
 
-        .header { text-align: center; border-bottom: 1px solid #333; margin-bottom: 25px; padding-bottom: 15px; position: relative; }
-        .header h1 { font-size: 22px; margin: 0; color: var(--gold); letter-spacing: 3px; text-transform: uppercase; text-shadow: 0 0 10px rgba(255, 204, 0, 0.5); }
-        .header p { font-size: 11px; color: #888; margin: 8px 0 0 0; letter-spacing: 1px; }
-        
-        /* Hiệu ứng đèn LED trạng thái */
-        .led-status {
-            width: 10px; height: 10px;
-            background-color: var(--neon-green);
+        /* Scan Visuals */
+        #scan-area { display: none; margin-top: 20px; }
+        .radar {
+            width: 80px; height: 80px;
+            border: 2px solid var(--neon-green);
             border-radius: 50%;
-            position: absolute;
-            top: 5px; right: 5px;
-            box-shadow: 0 0 10px var(--neon-green);
-            animation: blink 1s infinite;
+            margin: 0 auto 15px auto;
+            position: relative;
+            background: radial-gradient(circle, var(--dark-bg) 30%, #001a00 100%);
         }
+        .radar::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            border-top: 2px solid var(--neon-green);
+            border-radius: 50%;
+            animation: rotate 2s linear infinite;
+        }
+        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        .progress-bar { background: #222; height: 4px; width: 100%; margin: 10px 0; border-radius: 2px; }
+        #fill { background: var(--neon-green); height: 100%; width: 0%; box-shadow: 0 0 10px var(--neon-green); }
+
+        #logs { 
+            background: #000; 
+            height: 120px; 
+            padding: 10px; 
+            font-size: 10px; 
+            color: #666; 
+            overflow: hidden; 
+            border: 1px solid #222;
+        }
+
+        #result { display: none; margin-top: 20px; padding: 20px; border: 2px solid; text-align: center; border-radius: 5px; }
+        .safe { border-color: var(--neon-green); color: var(--neon-green); }
+        .danger { border-color: var(--neon-red); color: var(--neon-red); }
+
+        .shake { animation: shake 0.2s infinite; }
+        @keyframes shake { 0% { transform: translate(1px, 1px); } 50% { transform: translate(-1px, -1px); } 100% { transform: translate(1px, -1px); } }
+    </style>
+</head>
+<body>
+
+<canvas id="matrix-bg"></canvas>
+
+<div class="main-frame" id="box">
+    <div class="header">
+        <h1>HỆ THỐNG QUÉT BẢO MẬT</h1>
+        <p>SECURE VERIFICATION • VERSION 5.1.0</p>
+    </div>
+
+    <div id="input-ui" class="input-group">
+        <label>Trang web:</label>
+        <input type="text" id="domain" placeholder="Nhập địa chỉ web...">
+        <label>Tên tài khoản:</label>
+        <input type="text" id="username" placeholder="Nhập tên tài khoản...">
+        <button onclick="runScan()">KIỂM TRA</button>
+    </div>
+
+    <div id="scan-area">
+        <div class="radar"></div>
+        <div style="display:flex; justify-content: space-between; font-size: 10px; color: var(--gold);">
+            <span id="stat">Đang xử lý...</span>
+            <span id="perc">0%</span>
+        </div>
+        <div class="progress-bar"><div id="fill"></div></div>
+        <div id="logs"></div>
+    </div>
+
+    <div id="result"></div>
+</div>
+
+<script>
+    // Matrix Effect
+    const canvas = document.getElementById('matrix-bg');
+    const ctx = canvas.getContext('2d');
+    function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+    window.onresize = resize; resize();
+    const cols = Math.floor(canvas.width / 15);
+    const yP = Array(cols).fill(0);
+    function draw() {
+        ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "#0F0";
+        yP.forEach((y, i) => {
+            ctx.fillText(Math.floor(Math.random()*10), i * 15, y);
+            if (y > canvas.height && Math.random() > 0.98) yP[i] = 0; else yP[i] += 15;
+        });
+    }
+    setInterval(draw, 50);
+
+    // Scan Logic
+    function runScan() {
+        const d = document.getElementById('domain').value.trim().toLowerCase();
+        const u = document.getElementById('username').value.trim();
+        if(!d || !u) return alert("Nhập đủ thông tin!");
+
+        document.getElementById('input-ui').style.display = 'none';
+        document.getElementById('scan-area').style.display = 'block';
+
+        let p = 0;
+        const fill = document.getElementById('fill');
+        const logs = document.getElementById('logs');
+        const phrases = ["Kết nối IP...", "Dò tìm Script...", "Xác minh MD5...", "Đối soát Database...", "Hoàn tất."];
+
+        const itv = setInterval(() => {
+            p += Math.random() * 5;
+            if(p >= 100) {
+                p = 100;
+                clearInterval(itv);
+                showRes(d, u);
+            }
+            fill.style.width = p + "%";
+            document.getElementById('perc').innerText = Math.round(p) + "%";
+            if(Math.random() > 0.7) {
+                const l = document.createElement('div');
+                l.innerText = "> " + phrases[Math.floor(Math.random()*phrases.length)];
+                logs.appendChild(l);
+                logs.scrollTop = logs.scrollHeight;
+            }
+        }, 100);
+    }
+
+    function showRes(d, u) {
+        document.getElementById('scan-area').style.display = 'none';
+        const r = document.getElementById('result');
+        const b = document.getElementById('box');
+        r.style.display = 'block';
+
+        if(d.includes("mm88")) {
+            r.className = "safe";
+            r.innerHTML = `<h2>AN TOÀN TUYỆT ĐỐI</h2><p>Tài khoản <b>${u}</b> trên hệ thống <b>${d}</b> hoàn toàn minh bạch. Không phát hiện mã ẩn.</p>`;
+        } else {
+            b.classList.add('shake');
+            r.className = "danger";
+            r.innerHTML = `<h2>CẢNH BÁO NGUY HIỂM</h2><p>Phát hiện mã độc can thiệp kết quả trên trang <b>${d}</b>. Tài khoản <b>${u}</b> rủi ro cao!</p>`;
+        }
+    }
+</script>
+</body>
+</html>
