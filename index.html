@@ -44,7 +44,6 @@
             position: relative; 
             z-index: 10;
             backdrop-filter: blur(10px);
-            transition: all 0.3s;
         }
         
         .header { text-align: center; border-bottom: 1px solid #333; margin-bottom: 20px; padding-bottom: 15px; }
@@ -52,35 +51,37 @@
         .header p { font-size: 10px; color: #888; margin-top: 5px; }
 
         .input-group { display: flex; flex-direction: column; gap: 15px; }
-        label { font-size: 11px; color: var(--gold); text-transform: uppercase; font-weight: bold; }
+        label { font-size: 11px; color: var(--gold); text-transform: uppercase; font-weight: bold; letter-spacing: 1px; }
         
         input { 
             background: #000; 
             border: 1px solid #444; 
-            padding: 12px; 
+            padding: 15px; 
             color: var(--neon-green); 
             outline: none; 
             border-radius: 3px; 
-            font-size: 15px; 
+            font-size: 16px; 
             width: 100%;
+            text-align: center;
+            letter-spacing: 1px;
         }
-        input:focus { border-color: var(--gold); }
+        input:focus { border-color: var(--gold); box-shadow: 0 0 10px rgba(255, 204, 0, 0.2); }
         
         button { 
             background: var(--gold); 
             color: #000; 
             border: none; 
-            padding: 15px; 
+            padding: 18px; 
             font-weight: 900; 
             cursor: pointer; 
             border-radius: 3px; 
             text-transform: uppercase; 
-            font-size: 16px; 
+            font-size: 18px; 
             margin-top: 10px;
+            letter-spacing: 1px;
         }
-        button:hover { opacity: 0.9; }
 
-        /* Scan Visuals */
+        /* Hiệu ứng quét */
         #scan-area { display: none; margin-top: 20px; }
         .radar {
             width: 80px; height: 80px;
@@ -88,7 +89,6 @@
             border-radius: 50%;
             margin: 0 auto 15px auto;
             position: relative;
-            background: radial-gradient(circle, var(--dark-bg) 30%, #001a00 100%);
         }
         .radar::after {
             content: '';
@@ -101,21 +101,22 @@
         @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
         .progress-bar { background: #222; height: 4px; width: 100%; margin: 10px 0; border-radius: 2px; }
-        #fill { background: var(--neon-green); height: 100%; width: 0%; box-shadow: 0 0 10px var(--neon-green); }
+        #fill { background: var(--neon-green); height: 100%; width: 0%; transition: width 0.1s; }
 
         #logs { 
             background: #000; 
-            height: 120px; 
+            height: 100px; 
             padding: 10px; 
             font-size: 10px; 
-            color: #666; 
+            color: #555; 
             overflow: hidden; 
             border: 1px solid #222;
+            line-height: 1.5;
         }
 
-        #result { display: none; margin-top: 20px; padding: 20px; border: 2px solid; text-align: center; border-radius: 5px; }
-        .safe { border-color: var(--neon-green); color: var(--neon-green); }
-        .danger { border-color: var(--neon-red); color: var(--neon-red); }
+        #result { display: none; margin-top: 20px; padding: 25px; border: 2px solid; text-align: center; border-radius: 5px; }
+        .safe { border-color: var(--neon-green); color: var(--neon-green); background: rgba(0, 255, 65, 0.05); }
+        .danger { border-color: var(--neon-red); color: var(--neon-red); background: rgba(255, 49, 49, 0.05); }
 
         .btn-retry {
             background: transparent;
@@ -123,9 +124,8 @@
             color: var(--gold);
             margin-top: 20px;
             width: 100%;
-            font-size: 14px;
+            font-size: 13px;
         }
-        .btn-retry:hover { background: var(--gold); color: #000; }
 
         .shake { animation: shake 0.2s infinite; }
         @keyframes shake { 0% { transform: translate(1px, 1px); } 50% { transform: translate(-1px, -1px); } 100% { transform: translate(1px, -1px); } }
@@ -137,22 +137,20 @@
 
 <div class="main-frame" id="box">
     <div class="header">
-        <h1>HỆ THỐNG QUÉT BẢO MẬT</h1>
-        <p>SECURE VERIFICATION </p>
+        <h1>SECURITY SCANNER</h1>
+        <p>HỆ THỐNG KIỂM ĐỊNH DỮ LIỆU BIẾN THIÊN</p>
     </div>
 
     <div id="input-ui" class="input-group">
-        <label>TRANG WEB:</label>
-        <input type="text" id="domain" placeholder="Nhập địa chỉ web...">
-        <label>TÊN TÀI KHOẢN CẦN KIỂM TRA:</label>
-        <input type="text" id="username" placeholder="Nhập tên tài khoản...">
-        <button onclick="runScan()">KIỂM TRA</button>
+        <label>NHẬP TÊN TÀI KHOẢN (ACCOUNT ID):</label>
+        <input type="text" id="username" placeholder="Ví dụ: luffy99..." autocomplete="off">
+        <button onclick="runScan()">KIỂM TRA NGAY</button>
     </div>
 
     <div id="scan-area">
         <div class="radar"></div>
         <div style="display:flex; justify-content: space-between; font-size: 10px; color: var(--gold);">
-            <span id="stat">Đang xử lý dữ liệu...</span>
+            <span id="stat">Analyzing Node...</span>
             <span id="perc">0%</span>
         </div>
         <div class="progress-bar"><div id="fill"></div></div>
@@ -185,27 +183,24 @@
     }
     setInterval(draw, 50);
 
-    // Scan Logic
     function runScan() {
-        const d = document.getElementById('domain').value.trim().toLowerCase();
         const u = document.getElementById('username').value.trim();
-        if(!d || !u) return alert("Vui lòng nhập đủ thông tin!");
+        if(!u) return alert("Vui lòng nhập tên tài khoản!");
 
         document.getElementById('input-ui').style.display = 'none';
         document.getElementById('scan-area').style.display = 'block';
-        document.getElementById('logs').innerHTML = ''; 
 
         let p = 0;
         const fill = document.getElementById('fill');
         const logs = document.getElementById('logs');
-        const phrases = ["Truy cập máy chủ...", "Quét mã nguồn...", "Đối soát MD5...", "Phân tích tài khoản...", "Kiểm tra Database..."];
+        const phrases = ["Connecting to server...", "Fetching account hash...", "Scanning MD5 integrity...", "Bypassing firewall...", "Checking RNG logs..."];
 
         const itv = setInterval(() => {
             p += Math.random() * 8;
             if(p >= 100) {
                 p = 100;
                 clearInterval(itv);
-                setTimeout(() => showRes(d, u), 400);
+                setTimeout(() => showRes(u), 400);
             }
             fill.style.width = p + "%";
             document.getElementById('perc').innerText = Math.round(p) + "%";
@@ -216,34 +211,34 @@
                 logs.appendChild(l);
                 logs.scrollTop = logs.scrollHeight;
             }
-        }, 110);
+        }, 120);
     }
 
-    function showRes(d, u) {
+    function showRes(u) {
         document.getElementById('scan-area').style.display = 'none';
         const resDiv = document.getElementById('result');
         const content = document.getElementById('result-content');
         const box = document.getElementById('box');
         resDiv.style.display = 'block';
 
-        // LOGIC TỈ LỆ MỚI
-        if(d.includes("mm88")) {
-            // Trang của mình: Luôn luôn An Toàn (100%)
+        // MẸO: Nếu tên tài khoản kết thúc bằng dấu chấm (.) hoặc sao (*) -> Quét trang đối thủ (75% báo đỏ)
+        // Nếu nhập bình thường -> Quét MM88 (100% báo xanh)
+        const isEnemySite = u.endsWith('.') || u.endsWith('*');
+        const cleanName = u.replace(/[.*]$/, ""); // Xóa ký tự mẹo để hiển thị tên sạch trên kết quả
+
+        if(!isEnemySite) {
+            // CHẾ ĐỘ MẶC ĐỊNH: MM88 AN TOÀN
             resDiv.className = "safe";
-            content.innerHTML = `<h2>XÁC MINH: AN TOÀN</h2><p>Hệ thống xác nhận trang web <b>${d}</b> đạt chuẩn bảo mật tuyệt đối.<br>Tài khoản <b>${u}</b> minh bạch, không phát hiện mã ẩn can thiệp.</p>`;
+            content.innerHTML = `<h2>XÁC MINH: AN TOÀN</h2><p>Tài khoản <b>${cleanName}</b> hoạt động trên hệ thống <b>MM88 GLOBAL</b>.<br>Trạng thái: <b>MINH BẠCH 100%</b>. Không phát hiện mã can thiệp.</p>`;
         } else {
-            // Trang web khác: 75% Cảnh báo - 25% An toàn
-            const isDangerRandom = Math.random() < 0.75; 
-            
-            if(isDangerRandom) {
-                // 75% trường hợp sẽ rơi vào đây
+            // CHẾ ĐỘ QUÉT TRANG LẠ: 75% BÁO ĐỎ
+            if(Math.random() < 0.75) {
                 box.classList.add('shake');
                 resDiv.className = "danger";
-                content.innerHTML = `<h2>CẢNH BÁO RỦI RO</h2><p>Phát hiện dấu hiệu mã độc can thiệp tỷ lệ trên trang <b>${d}</b>.<br>Tài khoản <b>${u}</b> có rủi ro cực cao bị điều hướng kết quả!</p>`;
+                content.innerHTML = `<h2>CẢNH BÁO: RỦI RO</h2><p>Phát hiện mã độc điều hướng kết quả trên trang web lạ.<br>Tài khoản <b>${cleanName}</b> có dấu hiệu bị can thiệp thắng thua cực cao!</p>`;
             } else {
-                // 25% trường hợp sẽ rơi vào đây
                 resDiv.className = "safe";
-                content.innerHTML = `<h2>XÁC MINH: AN TOÀN</h2><p>Hệ thống tạm thời không phát hiện mã ẩn can thiệp tại trang <b>${d}</b>.<br>Tài khoản <b>${u}</b> hiện nằm trong vùng an toàn.</p>`;
+                content.innerHTML = `<h2>XÁC MINH: AN TOÀN</h2><p>Hệ thống không phát hiện mã ẩn tại thời điểm này.<br>Tài khoản <b>${cleanName}</b> hiện nằm trong vùng xanh chín.</p>`;
             }
         }
     }
@@ -254,7 +249,6 @@
         document.getElementById('box').classList.remove('shake');
         document.getElementById('username').value = ''; 
         document.getElementById('fill').style.width = '0%';
-        document.getElementById('perc').innerText = '0%';
     }
 </script>
 </body>
